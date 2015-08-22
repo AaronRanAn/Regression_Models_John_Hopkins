@@ -7,22 +7,9 @@ output: pdf_document
 
 ## Executive Summary
 
-### Context:
+TBD
 
-You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
-
-“Is an automatic or manual transmission better for MPG”
-"Quantify the MPG difference between automatic and manual transmissions"
-
-### Questions: 
-
-Take the mtcars data set and write up an analysis to answer their question using regression models and exploratory data analyses.
-
-Written as a PDF printout of a compiled (using knitr) R markdown document.
-Brief. Roughly the equivalent of 2 pages or less for the main text. Supporting figures in an appendix can be included up to 5 total pages including the 2 for the main report. The appendix can only include figures.
-Include a first paragraph executive summary.
-
-## Data Management and Exploratory Analysis
+## Section 1: Data Management and Exploratory Analysis
 
 First step is to structure the data into a regression-friendly way. Therefore every categorical variable in the mtcars dataset is transformed into factor. 
 
@@ -39,14 +26,13 @@ attach(mtcars)
 
 ```
 
-
-## Section 1: Inference and ANOVA
+## Section 2: Inference and ANOVA
 
 In order to explore if the automatic and manual transmission group have significantly different MPG value, our first attempt would be exploratory analysis and ANOVA. 
 
 In the exploratory analysis, a boxplot is used below to illustrate the  difference of MPG between these two groups. 
 
-```{r echo=FALSE}
+```{r, echo=FALSE, fig.width=7, fig.height=3.5}
 
 boxplot(mtcars$mpg ~ mtcars$am, xlab="Transmission (0 = Automatic, 1 = Manual)", ylab="MPG",
         main="Boxplot of MPG vs. Transmission")
@@ -68,11 +54,9 @@ TukeyHSD(fit)
 
 The Tukey's HSD test yields a p-vaule of 0.000285, which suggests the group difference between two levels of transmission is significantly different from each other. Therefore, we can answer the first question. 
 
-## Section 2: Regression Analysis
+## Section 3: Regression Analysis
 
 After we determined the group difference between two transmission levels is significant, we need to quatify that difference using regression models. 
-
-### Step 1: simply fit a model on the mpg and transmission. 
 
 Our first model would be simply be fitted on the MPG and different transmission level. 
 
@@ -132,14 +116,42 @@ anova(final_mod, sec_final_mod)
 
 summary(final_mod)
 
+confint(final_mod)
+
 ```
 
 The final model achieved 0.86 adjusted R square, which is better than the full model and the step model. Also the final model is simple and easy to understand so the parsimonious is prioritized so we can clearly quantify the effect on different levels of transmission. 
 
-The results sugguests that holding cyl, hp and wt constant, cars with manual transmission add 9.89860 - 
+The results sugguests that holding cyl, hp and wt constant, cars with manual transmission add 9.89860 + (-3.14499)*wt more MPG on the average than cars with automatic transmission.
 
-Thus, the result shows that when "wt" (weight lb/1000) and "qsec" (1/4 mile time) remain constant, cars with manual transmission add 14.079 + (-4.141)*wt more MPG (miles per gallon) on average than cars with automatic transmission. That is, a manual transmitted car that weighs 2000 lbs have 5.797 more MPG than an automatic transmitted car that has both the same weight and 1/4 mile time.
+The aforementioned interaction also suggest the difference between MPG that due to transimission difference diminish as the weight of car gets bigger. That is, the heavier the car is, the difference 
 
+For instance, holding other variables (cyl and hp) constant, a manual transmitted car that weighs 2000 lbs have 3.60862 more MPG than an automatic transmitted car that has both the same weight. 
+
+
+### Section 4: Model Dignostics and Supporting Figures
+
+1. Scatter Plot
+
+```{r}
+
+library(ggplot2)
+
+ggplot(mtcars, aes(x=wt, y=mpg, group=am, color=am, height=3, width=3)) + geom_point() +  
+scale_colour_discrete(labels=c("Automatic", "Manual")) + 
+xlab("weight") + ggtitle("Scatter Plot of MPG vs. Weight by Transmission")
+
+```
+
+
+2. Residual Plot
+
+```{r, fig.height=5, fig.width=7}
+
+par(mfrow = c(2, 2))
+plot(final_mod)
+
+```
 
 
 

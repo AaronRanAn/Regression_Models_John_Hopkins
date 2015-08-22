@@ -7,7 +7,10 @@ output: pdf_document
 
 ## Executive Summary
 
-TBD
+In this study, we aim to explore the relatonship between various variables and miles per gallon (MPG), using the mtcars dataset in the R default. The question we want to answer is whether different tansmission levels, automatic or manual, has an effect on the miles per gallon for a car. Furthermore, we want to quantify that difference using regression models. 
+
+Specifically, we began analysis by using exploratory analysis and ANOVA to determine there is a statistically significant difference in MPG for different tranmission levels. Then we fit several multiple linear regression and select the best one to quatify that diiferent. In conclusion, holding the number of cylinders, gross horsepower and weight constant, cars with manual transmission add 9.89860 + (-3.14499)*wt more MPG on the average than cars with automatic transmission. Thus, cars that are lighter in weight with a manual transmission and cars that are heavier in weight with an automatic transmission will have higher MPG values.
+A series of model diagnostics plots are produced at the end of this report. 
 
 ## Section 1: Data Management and Exploratory Analysis
 
@@ -39,9 +42,7 @@ boxplot(mtcars$mpg ~ mtcars$am, xlab="Transmission (0 = Automatic, 1 = Manual)",
 
 ```
 
-From the plot, we can visually infer that the Manual Transmission group has higher mean of MPG value than the Automatic group. 
-
-Next an ANOVA procedure is used to test if this visual different is really significantly different. 
+From the boxplot, we can visually infer that the Manual Transmission group has higher mean of MPG value than the Automatic group. Next an ANOVA procedure is used to test if this visual different is really significantly different. 
 
 
 ```{r}
@@ -52,7 +53,7 @@ TukeyHSD(fit)
 
 ```
 
-The Tukey's HSD test yields a p-vaule of 0.000285, which suggests the group difference between two levels of transmission is significantly different from each other. Therefore, we can answer the first question. 
+The Tukey's HSD test yields a p-vaule of 0.000285, which suggests the group difference between two levels of transmission is significantly different from each other. Therefore, we can determine the MPG difference between different tranmission levels is significant. 
 
 ## Section 3: Regression Analysis
 
@@ -105,16 +106,20 @@ sec_final_mod <- lm(mpg ~ cyl + hp + wt + am + cyl:hp + wt:am, data = mtcars)
 
 drop1(sec_final_mod, test="F")
 
-final_mod <- lm(mpg ~ cyl + hp + wt + am + wt:am, data = mtcars)
-
-anova(final_mod, sec_final_mod)
-
 ```
 
 
-```{r eval=F}
+```{r}
 
-summary(final_mod)
+final_mod <- lm(mpg ~ cyl + hp + wt + am + wt:am, data = mtcars)
+
+anova(final_mod, sec_final_mod)
+```
+
+
+```{r}
+
+summary(final_mod)$coef
 
 confint(final_mod)
 
@@ -124,7 +129,7 @@ The final model achieved 0.86 adjusted R square, which is better than the full m
 
 The results sugguests that holding cyl, hp and wt constant, cars with manual transmission add 9.89860 + (-3.14499)*wt more MPG on the average than cars with automatic transmission.
 
-The aforementioned interaction also suggest the difference between MPG that due to transimission difference diminish as the weight of car gets bigger. That is, the heavier the car is, the difference 
+The aforementioned interaction also suggest the difference between MPG that due to transimission difference diminish as the weight of car gets bigger. That is, the heavier the car, the less different their MPG level due to different transmission. This could be revealed from the scatter plot in next section. 
 
 For instance, holding other variables (cyl and hp) constant, a manual transmitted car that weighs 2000 lbs have 3.60862 more MPG than an automatic transmitted car that has both the same weight. 
 
@@ -133,9 +138,13 @@ For instance, holding other variables (cyl and hp) constant, a manual transmitte
 
 1. Scatter Plot
 
-```{r}
+```{r, echo=F}
 
 library(ggplot2)
+
+```
+
+```{r, fig.height=3, fig.width=7}
 
 ggplot(mtcars, aes(x=wt, y=mpg, group=am, color=am, height=3, width=3)) + geom_point() +  
 scale_colour_discrete(labels=c("Automatic", "Manual")) + 
@@ -143,16 +152,14 @@ xlab("weight") + ggtitle("Scatter Plot of MPG vs. Weight by Transmission")
 
 ```
 
-
 2. Residual Plot
 
-```{r, fig.height=5, fig.width=7}
+```{r, fig.height=6, fig.width=6}
 
 par(mfrow = c(2, 2))
 plot(final_mod)
 
 ```
-
 
 
 
